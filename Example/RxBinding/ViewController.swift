@@ -29,7 +29,9 @@ class ViewController: UIViewController {
     private let characterCountLabel1 = UILabel()
     private let characterCountLabel2 = UILabel()
     
-    private let viewModel: ViewModel
+    private let button = UIButton()
+    
+    private var viewModel: ViewModel
     private let disposeBag = DisposeBag()
     
     init(viewModel: ViewModel) {
@@ -49,24 +51,20 @@ class ViewController: UIViewController {
         view.addSubview(label)
         view.addSubview(characterCountLabel1)
         view.addSubview(characterCountLabel2)
+        view.addSubview(button)
+        
         createConstraints()
         
-        disposeBag
-            ~ viewModel.text <~> textFeild.rx.text
-            ~ viewModel.uppercaseText ~> label.rx.text
-            ~ viewModel.charactersCount ~> [characterCountLabel1, characterCountLabel2].map { $0.rx.text }
+        button.setTitle("Renew viewModel", for: .normal)
+        button.setTitleColor(.orange, for: .normal)
+        button.rx.tap
+            .subscribe(onNext: {
+                self.viewModel = ViewModel()
+                self.configureViewModel()
+            })
+            .disposed(by: disposeBag)
         
-        /**
-        viewModel.text <~> textFeild.rx.text ~
-        viewModel.uppercaseText ~> label.rx.text ~
-        viewModel.charactersCount ~> [characterCountLabel1, characterCountLabel2].map { $0.rx.text }
-            ~ disposeBag
-        */
-
-        /** The demo to use the ~> operator for drivers.
-        viewModel.uppercaseText.asDriver(onErrorJustReturn: "") ~> label.rx.text ~ disposeBag
-        viewModel.charactersCount.asDriver(onErrorJustReturn: "0") ~> [characterCountLabel1, characterCountLabel2].map { $0.rx.text } ~ disposeBag
-        */
+        configureViewModel()
     }
     
     private func createConstraints() {
@@ -93,6 +91,28 @@ class ViewController: UIViewController {
             $0.top.equalTo(characterCountLabel1.snp.bottom).offset(10)
         }
 
+        button.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.top.equalTo(characterCountLabel2.snp.bottom).offset(50)
+        }
+    }
+    
+    func configureViewModel() {
+        viewModel.text <~~> textFeild.rx.text
+        viewModel.uppercaseText ~~> label.rx.text
+        viewModel.charactersCount ~~> [characterCountLabel1, characterCountLabel2].map { $0.rx.text }
+        
+        /**
+         viewModel.text <~> textFeild.rx.text ~
+         viewModel.uppercaseText ~> label.rx.text ~
+         viewModel.charactersCount ~> [characterCountLabel1, characterCountLabel2].map { $0.rx.text }
+         ~ disposeBag
+         */
+        
+        /** The demo to use the ~> operator for drivers.
+         viewModel.uppercaseText.asDriver(onErrorJustReturn: "") ~> label.rx.text ~ disposeBag
+         viewModel.charactersCount.asDriver(onErrorJustReturn: "0") ~> [characterCountLabel1, characterCountLabel2].map { $0.rx.text } ~ disposeBag
+         */
     }
     
 }

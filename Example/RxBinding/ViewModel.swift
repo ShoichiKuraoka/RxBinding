@@ -19,7 +19,7 @@ class ViewModel {
                 return nil
             }
             return text.uppercased()
-        }
+        }.share()
     }
     
     var charactersCount: Observable<String?> {
@@ -28,7 +28,7 @@ class ViewModel {
                 return "0"
             }
             return String(text.count)
-        }
+        }.share()
     }
     
 }

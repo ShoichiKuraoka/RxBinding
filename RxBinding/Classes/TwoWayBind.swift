@@ -109,3 +109,10 @@ extension BehaviorRelay {
     }
     
 }
+
+infix operator <~~> : DefaultPrecedence
+
+@discardableResult
+public func <~~> <T>(relay: BehaviorRelay<T>, property: ControlProperty<T>) -> Disposable {
+    return relay.twoWayBind(to: property).retainUntilReleaseOf(relay)
+}
